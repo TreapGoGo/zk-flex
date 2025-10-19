@@ -23,10 +23,21 @@ contract DemoSimple is Script {
         console.log("==================================================");
         console.log("");
         
+        // Load addresses from environment variables
+        address bobReal = vm.envOr("BOB_REAL_ADDRESS", address(0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc));
+        address bobProxy = vm.envOr("BOB_PROXY_ADDRESS", address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266));
+        address alice = vm.envOr("ALICE_ADDRESS", address(0x70997970C51812dc3A010C7d01b50e0d17dc79C8));
+        
+        console.log("Demo Addresses:");
+        console.log("  Bob_real:", bobReal);
+        console.log("  Bob_proxy:", bobProxy);
+        console.log("  Alice:", alice);
+        console.log("");
+        
         // STEP 0: Setup test balances (before broadcast)
-        console.log("[0/6] Setup: Funding test wallets...");
-        _fundTestWallets();
-        console.log("      9 Anvil accounts funded with test ETH");
+        console.log("[0/6] Setup: Funding wallets...");
+        _fundTestWallets(bobReal, bobProxy, alice);
+        console.log("      Demo addresses funded with test ETH");
         console.log("");
         
         vm.startBroadcast();
@@ -40,9 +51,8 @@ contract DemoSimple is Script {
         
         // STEP 2: Create wallet pool
         console.log("[2/6] Bob creates wallet pool instance...");
-        address[32] memory pool = _makeWalletPool();
+        address[32] memory pool = _makeWalletPool(bobReal);
         
-        address bobReal = pool[15];
         console.log("      Pool: 32 addresses");
         console.log("      Bob_real:", bobReal, "(at position 15)");
         console.log("      Bob_real balance:", bobReal.balance / 1 ether, "ETH");
@@ -149,54 +159,63 @@ contract DemoSimple is Script {
         console.log("");
     }
     
-    function _makeWalletPool() internal pure returns (address[32] memory) {
+    function _makeWalletPool(address bobReal) internal pure returns (address[32] memory) {
         address[32] memory p;
         
-        // Define Bob_real (Anvil Account #5)
-        address bobReal = 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc;
+        // Well-known addresses (public whales for mixing)
+        p[0] = 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045; // Vitalik
+        p[1] = 0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8; // Binance 7
+        p[2] = 0xDA9dfA130Df4dE4673b89022EE50ff26f6EA73Cf; // Kraken 4
+        p[3] = 0x8315177aB297bA92A06054cE80a67Ed4DBd7ed3a; // Bitfinex
+        p[4] = 0x742d35Cc6634C0532925a3b844Bc454e4438f44e; // Bitfinex 2
         
-        // Use Anvil accounts 0-4, 6-9 (skip #5, will use for Bob at position 15)
-        p[0] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266; // Anvil #0
-        p[1] = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8; // Anvil #1
-        p[2] = 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC; // Anvil #2
-        p[3] = 0x90F79bf6EB2c4f870365E785982E1f101E93b906; // Anvil #3
-        p[4] = 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65; // Anvil #4
-        p[5] = 0x976EA74026E726554dB657fA54763abd0C3a0aa9; // Anvil #6
-        p[6] = 0x14dC79964da2C08b23698B3D3cc7Ca32193d9955; // Anvil #7
-        p[7] = 0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f; // Anvil #8
-        p[8] = 0xa0Ee7A142d267C1f36714E4a8F75612F20a79720; // Anvil #9
+        // More public addresses (DAOs, protocols)
+        p[5] = 0x1a9C8182C09F50C8318d769245beA52c32BE35BC; // Uniswap Foundation
+        p[6] = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2; // Maker DAO
+        p[7] = 0x2FAF487A4414Fe77e2327F0bf4AE2a264a776AD2; // FTX Recovery
+        p[8] = 0x40B38765696e3d5d8d9d834D8AaD4bB6e418E489; // Jump Trading
         
-        // Fill positions 9-14 and 16-31 with generated addresses
-        for (uint i = 9; i < 32; i++) {
-            if (i == 15) {
-                p[i] = bobReal; // Bob_real ONLY at position 15
-            } else {
-                p[i] = address(uint160(uint256(keccak256(abi.encodePacked("addr", i)))));
-            }
+        // Fill positions 9-14 with generated addresses
+        for (uint i = 9; i < 15; i++) {
+            p[i] = address(uint160(uint256(keccak256(abi.encodePacked("public", i)))));
+        }
+        
+        // Bob_real at position 15 (hidden among public addresses)
+        p[15] = bobReal;
+        
+        // Fill remaining positions 16-31
+        for (uint i = 16; i < 32; i++) {
+            p[i] = address(uint160(uint256(keccak256(abi.encodePacked("filler", i)))));
         }
         
         return p;
     }
     
     /**
-     * @notice Fund test wallets with ETH for realistic demo
-     * @dev Uses vm.deal cheatcode to give addresses test ETH
+     * @notice Fund demo wallets with test ETH
+     * @dev Uses vm.deal cheatcode - gives addresses test ETH in local chain
      */
-    function _fundTestWallets() internal {
-        // Fund Anvil accounts with varying amounts (simulate real scenario)
-        vm.deal(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, 100000 ether);  // Anvil #0 - Large holder
-        vm.deal(0x70997970C51812dc3A010C7d01b50e0d17dc79C8, 50000 ether);   // Anvil #1 - Medium
-        vm.deal(0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC, 25000 ether);   // Anvil #2 
-        vm.deal(0x90F79bf6EB2c4f870365E785982E1f101E93b906, 10000 ether);   // Anvil #3
-        vm.deal(0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65, 5000 ether);    // Anvil #4
+    function _fundTestWallets(address bobReal, address bobProxy, address alice) internal {
+        // Fund Bob_real (the address Bob wants to prove)
+        vm.deal(bobReal, 15000 ether);
+        console.log("      Bob_real funded:", bobReal, "- 15,000 ETH");
         
-        // Bob_real (Anvil #5) - The address Bob wants to prove ownership of
-        vm.deal(0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc, 15000 ether);   // Bob_real - Target balance
+        // Fund Bob_proxy (the address that creates instances)
+        vm.deal(bobProxy, 100 ether);
+        console.log("      Bob_proxy funded:", bobProxy, "- 100 ETH (for gas)");
         
-        vm.deal(0x976EA74026E726554dB657fA54763abd0C3a0aa9, 8000 ether);    // Anvil #6
-        vm.deal(0x14dC79964da2C08b23698B3D3cc7Ca32193d9955, 3000 ether);    // Anvil #7
-        vm.deal(0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f, 1000 ether);    // Anvil #8
-        vm.deal(0xa0Ee7A142d267C1f36714E4a8F75612F20a79720, 500 ether);     // Anvil #9
+        // Fund Alice (the verifier)
+        vm.deal(alice, 50 ether);
+        console.log("      Alice funded:", alice, "- 50 ETH (for gas)");
+        
+        // Fund some public addresses for realistic pool
+        vm.deal(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045, 500000 ether); // Vitalik
+        vm.deal(0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8, 200000 ether); // Binance
+        vm.deal(0xDA9dfA130Df4dE4673b89022EE50ff26f6EA73Cf, 100000 ether); // Kraken
+        vm.deal(0x1a9C8182C09F50C8318d769245beA52c32BE35BC, 50000 ether);  // Uniswap
+        vm.deal(0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2, 30000 ether);  // Maker
+        
+        console.log("      5 public addresses funded (whales)");
     }
 }
 

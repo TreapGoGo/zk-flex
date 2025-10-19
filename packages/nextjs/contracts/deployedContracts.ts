@@ -6,14 +6,46 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    YourContract: {
+    WealthProofRegistry: {
       address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
       abi: [
         {
           type: "constructor",
+          inputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "allInstances",
           inputs: [
             {
-              name: "_owner",
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "createProofInstance",
+          inputs: [
+            {
+              name: "walletPool",
+              type: "address[32]",
+              internalType: "address[32]",
+            },
+          ],
+          outputs: [
+            {
+              name: "instance",
               type: "address",
               internalType: "address",
             },
@@ -21,26 +53,111 @@ const deployedContracts = {
           stateMutability: "nonpayable",
         },
         {
-          type: "receive",
-          stateMutability: "payable",
-        },
-        {
           type: "function",
-          name: "greeting",
+          name: "getAllInstances",
           inputs: [],
           outputs: [
             {
               name: "",
-              type: "string",
-              internalType: "string",
+              type: "address[]",
+              internalType: "address[]",
             },
           ],
           stateMutability: "view",
         },
         {
           type: "function",
-          name: "owner",
+          name: "getInstanceVerifications",
+          inputs: [
+            {
+              name: "instance",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "records",
+              type: "tuple[]",
+              internalType: "struct WealthProofRegistry.VerificationRecord[]",
+              components: [
+                {
+                  name: "instance",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "verifier",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "threshold",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "result",
+                  type: "bool",
+                  internalType: "bool",
+                },
+                {
+                  name: "timestamp",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getUserInstances",
+          inputs: [
+            {
+              name: "user",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address[]",
+              internalType: "address[]",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getVerificationCount",
           inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "userInstances",
+          inputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
           outputs: [
             {
               name: "",
@@ -52,93 +169,146 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "premium",
+          name: "verifications",
+          inputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "instance",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "verifier",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "threshold",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "result",
+              type: "bool",
+              internalType: "bool",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "verifier",
           inputs: [],
           outputs: [
             {
               name: "",
+              type: "address",
+              internalType: "contract Groth16Verifier",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "verifyAndRecord",
+          inputs: [
+            {
+              name: "instance",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "proof",
+              type: "bytes",
+              internalType: "bytes",
+            },
+            {
+              name: "threshold",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "result",
               type: "bool",
               internalType: "bool",
             },
           ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "setGreeting",
-          inputs: [
-            {
-              name: "_newGreeting",
-              type: "string",
-              internalType: "string",
-            },
-          ],
-          outputs: [],
-          stateMutability: "payable",
-        },
-        {
-          type: "function",
-          name: "totalCounter",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "userGreetingCounter",
-          inputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "withdraw",
-          inputs: [],
-          outputs: [],
           stateMutability: "nonpayable",
         },
         {
           type: "event",
-          name: "GreetingChange",
+          name: "InstanceCreated",
           inputs: [
             {
-              name: "greetingSetter",
+              name: "creator",
               type: "address",
               indexed: true,
               internalType: "address",
             },
             {
-              name: "newGreeting",
-              type: "string",
-              indexed: false,
-              internalType: "string",
+              name: "instance",
+              type: "address",
+              indexed: true,
+              internalType: "address",
             },
             {
-              name: "premium",
+              name: "walletPool",
+              type: "address[32]",
+              indexed: false,
+              internalType: "address[32]",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ProofVerified",
+          inputs: [
+            {
+              name: "instance",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "verifier",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "threshold",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "result",
               type: "bool",
               indexed: false,
               internalType: "bool",
             },
             {
-              name: "value",
+              name: "timestamp",
               type: "uint256",
               indexed: false,
               internalType: "uint256",
