@@ -73,7 +73,7 @@ const Home: NextPage = () => {
           <div className="text-center mb-12">
             <h1 className="text-6xl md:text-7xl font-bold mb-6">
               <span className="bg-gradient-to-r from-blue-400 via-sky-400 to-cyan-400 bg-clip-text text-transparent">
-                ZK Flex
+                ZK-Flex
               </span>
             </h1>
             <p className="text-2xl md:text-3xl text-slate-300 mb-4 font-light">
@@ -224,20 +224,94 @@ const Home: NextPage = () => {
               {/* How it Works */}
               <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl p-8 shadow-xl">
                 <h3 className="text-xl font-bold text-slate-900 mb-6">How It Works</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+                  <div className="text-center flex-shrink-0">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-sky-500 rounded-xl flex items-center justify-center mx-auto mb-3">
                       <span className="text-white font-bold text-lg">1</span>
                     </div>
                     <p className="text-slate-700 text-sm font-medium">Create Wallet Pool</p>
                   </div>
-                  <div className="text-center">
+
+                  {/* Arrow 1: Blue to Purple Gradient */}
+                  <div className="flex-shrink-0 hidden md:block -mt-9">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" style={{ stopColor: "#3b82f6", stopOpacity: 1 }} />
+                          <stop offset="100%" style={{ stopColor: "#8b5cf6", stopOpacity: 1 }} />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M5 12h14m0 0l-6-6m6 6l-6 6"
+                        stroke="url(#gradient1)"
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-shrink-0 md:hidden">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="gradient1-mobile" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" style={{ stopColor: "#3b82f6", stopOpacity: 1 }} />
+                          <stop offset="100%" style={{ stopColor: "#8b5cf6", stopOpacity: 1 }} />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M12 5v14m0 0l6-6m-6 6l-6-6"
+                        stroke="url(#gradient1-mobile)"
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="text-center flex-shrink-0">
                     <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-3">
                       <span className="text-white font-bold text-lg">2</span>
                     </div>
                     <p className="text-slate-700 text-sm font-medium">Generate ZK Proof</p>
                   </div>
-                  <div className="text-center">
+
+                  {/* Arrow 2: Purple to Green Gradient */}
+                  <div className="flex-shrink-0 hidden md:block -mt-9">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" style={{ stopColor: "#8b5cf6", stopOpacity: 1 }} />
+                          <stop offset="100%" style={{ stopColor: "#10b981", stopOpacity: 1 }} />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M5 12h14m0 0l-6-6m6 6l-6 6"
+                        stroke="url(#gradient2)"
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-shrink-0 md:hidden">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="gradient2-mobile" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" style={{ stopColor: "#8b5cf6", stopOpacity: 1 }} />
+                          <stop offset="100%" style={{ stopColor: "#10b981", stopOpacity: 1 }} />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M12 5v14m0 0l6-6m-6 6l-6-6"
+                        stroke="url(#gradient2-mobile)"
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="text-center flex-shrink-0">
                     <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-3">
                       <span className="text-white font-bold text-lg">3</span>
                     </div>
