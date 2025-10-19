@@ -1112,7 +1112,7 @@ sequenceDiagram
     Web->>Instance: 读取快照
     Instance->>Web: addresses[32]+balances[32]
     Web->>Web: snarkjs.groth16.fullProve(witness)
-    Note over Web: 浏览器WASM执行<br/>~150k约束<br/>10-20秒
+    Note over Web: 浏览器WASM执行<br/>~1.88M约束<br/>30-60秒
     Web->>Bob: 证明生成成功
     Web->>Bob: 下载proof.json(288bytes)
     Bob->>Bob: 保存证明文件
@@ -1326,143 +1326,10 @@ sequenceDiagram
 
 ---
 
----
-
-## 技术方案对比：ECDSA vs EdDSA
-
-### 方案 A：ECDSA 签名验证方案（标准方案）
-
-#### 阶段 1：创建钱包池实例
-
-```mermaid
-sequenceDiagram
-    participant BobReal as Bob_real<br/>0xBBBB (大钱包)
-    participant BobProxy as Bob_proxy<br/>0xAAAA (小钱包)
-    participant MM as MetaMask
-    participant Web as 前端网页
-    participant Registry as Registry 合约
-    participant Instance as Instance 合约
-    
-    Note over BobProxy,Web: Bob 使用 Bob_proxy 创建实例
-    
-    BobProxy->>MM: 1. 连接 Bob_proxy 钱包
-    MM->>Web: 2. 返回 0xAAAA
-    
-    BobProxy->>Web: 3. 输入 32 个地址
-    Note over BobProxy: addresses[32] = [<br/>Vitalik: 0x1111...,<br/>项目方: 0x2222...,<br/>...,<br/>Bob_real: 0xBBBB...,  (混在第15个)<br/>...,<br/>大户: 0x3333...<br/>]
-    
-    Web->>MM: 4. 调用 createInstance(addresses[32])
-    MM->>BobProxy: 5. 弹窗: 授权交易?
-    BobProxy->>MM: 6. 确认
-    
-    MM->>Registry: 7. TX: createInstance
-    Note over MM,Registry: from: 0xAAAA (Bob_proxy)
-    
-    Registry->>Instance: 8. 部署新实例
-    Instance->>Instance: 9. 保存 addresses[32]
-    Instance->>Instance: 10. 读取 32 个地址的链上余额
-    Note over Instance: balances[32] = [<br/>[0] 500000 ETH,<br/>[1] 200000 ETH,<br/>...,<br/>[15] 10000 ETH,  (Bob_real)<br/>...,<br/>[31] 50000 ETH<br/>]
-    
-    Instance->>Registry: 11. 返回实例地址
-    Registry->>MM: 12. TX 成功
-    MM->>Web: 13. 显示实例信息
-    
-    Note over BobProxy: 链上可见数据:<br/>✅ Bob_proxy (0xAAAA) 创建了实例<br/>✅ 实例包含 32 个地址<br/>✅ 每个地址的余额快照<br/>❌ 不知道 Bob_real 是哪个
-```
-
-#### 阶段 2：生成 ZK 证明
-
-```mermaid
-sequenceDiagram
-    participant BobReal as Bob_real<br/>0xBBBB (大钱包)
-    participant MM as MetaMask
-    participant Web as 前端网页 (浏览器)
-    participant Instance as Instance 合约
-    
-    Note over BobReal,Web: Bob 切换到 Bob_real 账户生成证明
-    
-    BobReal->>MM: 1. 切换到 Bob_real 钱包
-    MM->>Web: 2. 当前账户: 0xBBBB
-    
-    BobReal->>Web: 3. 点击"生成证明"
-    Web->>BobReal: 4. 输入参数界面
-    BobReal->>Web: 5. 输入 walletIndex=15, threshold=10000 ETH
-    
-    Web->>MM: 6. 请求签名消息 "ZK Flex Proof"
-    Note over MM: Bob_real 的 ECDSA 私钥<br/>永远不离开 MetaMask
-    MM->>BobReal: 7. 弹窗: 签名消息?
-    BobReal->>MM: 8. 确认
-    MM->>MM: 9. 用 secp256k1 私钥签名
-    MM->>Web: 10. 返回 ECDSA 签名 (r, s, v)
-    Note over Web: signature = {<br/>r: 0x1234...,<br/>s: 0x5678...,<br/>v: 27<br/>}
-    
-    Web->>Instance: 11. 读取快照数据
-    Instance->>Web: 12. 返回 addresses[32], balances[32]
-    
-    Note over Web: === ZK 证明生成 (浏览器端) ===
-    Web->>Web: 13. 构建 witness
-    Note over Web: 私有输入:<br/>- signature_r<br/>- signature_s<br/>- walletIndex = 15<br/><br/>公开输入:<br/>- message<br/>- addresses[32]<br/>- balances[32]<br/>- threshold = 10000 ETH
-    
-    Web->>Web: 14. snarkjs.groth16.fullProve()
-    Note over Web: 电路约束: ~1,500,000<br/>主要计算:<br/>1. ecrecover(signature) = address<br/>   (椭圆曲线运算, ~1M 约束)<br/>2. address = addresses[15]<br/>3. balances[15] >= 10000
-    
-    Note over Web: ⏳ 计算中...<br/>进度: 25%... 50%... 75%...<br/>耗时: 30-60 秒
-    
-    Web->>Web: 15. 证明生成完成
-    Note over Web: proof.json = {<br/> proof: 288 bytes,<br/> publicInputs: {<br/>   message,<br/>   addresses[32],<br/>   balances[32],<br/>   threshold<br/> }<br/>}
-    
-    Web->>BobReal: 16. 下载 proof.json
-    
-    Note over BobReal: Bob 现在有:<br/>✅ proof.json (证明文件)<br/>✅ Instance 地址<br/><br/>隐私保护:<br/>❌ 没有暴露 Bob_real 地址<br/>❌ 没有暴露 walletIndex<br/>❌ signature 只在本地使用
-```
-
-#### 阶段 3：Alice 验证证明
-
-```mermaid
-sequenceDiagram
-    participant Bob as Bob
-    participant Alice as Alice
-    participant MM as MetaMask (Alice)
-    participant Web as 前端网页
-    participant Instance as Instance 合约
-    participant Verifier as Groth16Verifier
-    
-    Note over Bob,Alice: Bob 发送证明给 Alice
-    
-    Bob->>Alice: 1. 发送 proof.json + Instance 地址
-    Note over Alice: 收到:<br/>- proof.json<br/>- Instance: 0x9999...
-    
-    Alice->>Web: 2. 访问验证页面
-    Web->>Alice: 3. 上传界面
-    Alice->>Web: 4. 上传 proof.json + 输入 Instance 地址
-    
-    Web->>Instance: 5. 读取 Instance 数据
-    Instance->>Web: 6. 返回 addresses[32], balances[32]
-    
-    Web->>Alice: 7. 显示将要验证的信息
-    Note over Alice: 预览:<br/>- 32 个地址列表<br/>- 对应余额快照<br/>- 阈值: 10000 ETH<br/>- 快照区块: #123456
-    
-    Note over Web,Instance: ✅ 纯查询操作 (view 函数, Gas = 0)
-    
-    Web->>Instance: 8. 调用 verifyProof(proof, threshold)
-    Note over Web,Instance: 这是 view 函数<br/>不需要 MetaMask 签名<br/>不消耗 Gas<br/>浏览器直接调用
-    
-    Instance->>Instance: 9. 解析 proof 数据
-    Instance->>Verifier: 10. 调用 Groth16 验证
-    Note over Verifier: 验证椭圆曲线配对:<br/>e(pA, pB) = e(α, β) · e(C, δ)<br/><br/>纯数学计算，不修改状态
-    Verifier->>Instance: 11. 返回 true/false
-    
-    Instance->>Instance: 12. 检查 publicInputs 匹配快照
-    Instance->>Web: 13. 返回验证结果
-    
-    Web->>Alice: 14. 显示结果
-    Note over Alice: ✅ 验证通过! (免费查询)<br/><br/>Alice 知道:<br/>✅ 32个地址中某人余额>=10000 ETH<br/>❌ 不知道是谁<br/>❌ 不知道具体余额<br/><br/>可选: 如需链上记录验证历史<br/>可调用 verifyAndRecord (消耗 Gas)
-```
-
-
-**版本**: v0.5  
+**版本**: v0.6  
 **最后更新**: 2025-10-19  
 **维护者**: ZK Flex Team  
 **框架**: Scaffold-ETH 2 + Foundry + Next.js  
 **开发环境**: WSL 2 (Windows) / 原生 (macOS/Linux)
+
 
