@@ -50,16 +50,15 @@ yarn start
 
 ---
 
-## 📚 文档导航
+## 📚 文档（3 个核心）
 
-| 文档 | 用途 | 适合 |
-|------|------|------|
-| [README.md](README.md) | 项目介绍和快速开始 | 所有人 |
-| [QUICKSTART.md](QUICKSTART.md) | 10 分钟上手 | 新手 |
-| [FINAL_CHECKLIST.md](FINAL_CHECKLIST.md) | Hackathon 演示清单 | 演示前 |
-| [PRODUCT.md](PRODUCT.md) | 完整产品规格 | 深入理解 |
-| [ROADMAP.md](ROADMAP.md) | 开发进度追踪 | 团队协作 |
-| [SLIDES.md](SLIDES.md) | Pitch 演示大纲 | Branding |
+| 文档 | 用途 |
+|------|------|
+| [README.md](README.md) | 项目介绍（你在这里）|
+| [运行指南.md](运行指南.md) | **启动系统（必读）** |
+| [PRODUCT.md](PRODUCT.md) | 完整产品规格 |
+
+**其他**：[ROADMAP.md](ROADMAP.md)（进度）、[SLIDES.md](SLIDES.md)（Pitch）
 
 ---
 
