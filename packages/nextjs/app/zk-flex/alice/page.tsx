@@ -6,6 +6,7 @@ import { useAccount } from "wagmi";
 import { DocumentArrowUpIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { InstanceInfo } from "~~/components/zk-flex/InstanceInfo";
 
 /**
  * Alice 页面 - 验证 ZK 证明
@@ -56,14 +57,27 @@ const AlicePage: NextPage = () => {
       const proofText = await proofFile.text();
       const proofData = JSON.parse(proofText);
       
-      // TODO: 调用合约验证
-      // const result = await verifyProof({...});
+      console.log("Proof data:", proofData);
       
-      alert("Proof verification coming soon - requires contract integration");
+      // 调用合约 view 函数验证
+      // 注意：这是一个 view 函数，完全免费！
+      // TODO: 需要实现 proof 数据的序列化
+      
+      // 暂时使用 mock 验证
+      const mockProof = "0x" + "00".repeat(256); // 256 bytes
+      const thresholdWei = BigInt(parseFloat(threshold) * 1e18);
+      
+      // 这里需要调用实际的 verifyProof 函数
+      // 由于需要正确的 proof 格式，暂时显示说明
+      
+      setVerificationResult(true);
+      
+      alert("Verification successful! (Mock result - awaiting real ZK proof integration)");
       
     } catch (error) {
       console.error("Error verifying proof:", error);
-      alert("Failed to verify proof");
+      setVerificationResult(false);
+      alert("Failed to verify proof: " + (error as Error).message);
     }
   };
 
@@ -149,40 +163,17 @@ const AlicePage: NextPage = () => {
         </div>
 
         {/* Step 2: Preview Instance Data */}
-        {snapshot && walletPool && (
+        {instanceAddress && (
           <div className="card bg-base-100 shadow-xl mb-8">
             <div className="card-body">
               <h2 className="card-title text-2xl mb-4">
                 Instance Data Preview
               </h2>
-
-              <div className="stats stats-vertical lg:stats-horizontal shadow">
-                <div className="stat">
-                  <div className="stat-title">Snapshot Block</div>
-                  <div className="stat-value text-primary">{snapshot.blockNumber?.toString()}</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">Addresses in Pool</div>
-                  <div className="stat-value text-secondary">32</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">Anonymity Set</div>
-                  <div className="stat-value text-accent">3.125%</div>
-                  <div className="stat-desc">1/32 guess probability</div>
-                </div>
-              </div>
-
-              <div className="divider">Wallet Pool (first 5)</div>
-
-              <div className="space-y-2">
-                {walletPool.slice(0, 5).map((addr: string, i: number) => (
-                  <div key={i} className="flex items-center gap-2 p-2 bg-base-200 rounded-lg">
-                    <span className="text-sm font-mono text-base-content/60">[{i}]</span>
-                    <Address address={addr} />
-                  </div>
-                ))}
-                <div className="text-center text-base-content/40 py-2">... 27 more addresses ...</div>
-              </div>
+              <InstanceInfo 
+                instanceAddress={instanceAddress}
+                snapshot={snapshot}
+                walletPool={walletPool}
+              />
             </div>
           </div>
         )}
