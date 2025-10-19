@@ -204,7 +204,7 @@ const Home: NextPage = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-slate-700">
                       <CheckCircleIcon className="h-4 w-4 text-violet-500" />
-                      <span>~300k gas cost</span>
+                      <span>FREE (view function)</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-slate-700">
                       <CheckCircleIcon className="h-4 w-4 text-violet-500" />
@@ -259,7 +259,7 @@ const Home: NextPage = () => {
                   <div className="bg-white rounded-2xl p-4 shadow-sm">
                     <p className="text-blue-600 font-semibold mb-1 text-sm">Zero-Knowledge</p>
                     <p className="text-slate-600 text-xs">Groth16 zkSNARK</p>
-                    <p className="text-slate-400 text-xs">~150k constraints</p>
+                    <p className="text-slate-400 text-xs">~1.88M constraints</p>
                   </div>
 
                   <div className="bg-white rounded-2xl p-4 shadow-sm">
