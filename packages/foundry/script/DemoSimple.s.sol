@@ -60,9 +60,9 @@ contract DemoSimple is Script {
         
         // STEP 5: Verification (explanation)
         console.log("[5/5] Proof verification");
-        console.log("      - Alice calls verifyProof()");
-        console.log("      - FREE (view function)");
-        console.log("      - Result: VALID/INVALID");
+        console.log("      - Alice calls verifyProof() (VIEW)");
+        console.log("      - FREE (no gas)");
+        console.log("      - Result: Valid/Invalid");
         console.log("");
         
         // Summary
@@ -90,27 +90,30 @@ contract DemoSimple is Script {
     
     function _makeWalletPool() internal pure returns (address[32] memory) {
         address[32] memory p;
-        // Anvil accounts 0-9
-        p[0] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
-        p[1] = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
-        p[2] = 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC;
-        p[3] = 0x90F79bf6EB2c4f870365E785982E1f101E93b906;
-        p[4] = 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65;
-        p[5] = 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc;
-        p[6] = 0x976EA74026E726554dB657fA54763abd0C3a0aa9;
-        p[7] = 0x14dC79964da2C08b23698B3D3cc7Ca32193d9955;
-        p[8] = 0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f;
-        p[9] = 0xa0Ee7A142d267C1f36714E4a8F75612F20a79720;
         
-        // Fill rest
-        for (uint i = 10; i < 32; i++) {
+        // Define Bob_real (Anvil Account #5)
+        address bobReal = 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc;
+        
+        // Use Anvil accounts 0-4, 6-9 (skip #5, will use for Bob at position 15)
+        p[0] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266; // Anvil #0
+        p[1] = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8; // Anvil #1
+        p[2] = 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC; // Anvil #2
+        p[3] = 0x90F79bf6EB2c4f870365E785982E1f101E93b906; // Anvil #3
+        p[4] = 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65; // Anvil #4
+        p[5] = 0x976EA74026E726554dB657fA54763abd0C3a0aa9; // Anvil #6
+        p[6] = 0x14dC79964da2C08b23698B3D3cc7Ca32193d9955; // Anvil #7
+        p[7] = 0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f; // Anvil #8
+        p[8] = 0xa0Ee7A142d267C1f36714E4a8F75612F20a79720; // Anvil #9
+        
+        // Fill positions 9-14 and 16-31 with generated addresses
+        for (uint i = 9; i < 32; i++) {
             if (i == 15) {
-                p[i] = p[5]; // Bob_real at 15
+                p[i] = bobReal; // Bob_real ONLY at position 15
             } else {
-                p[i] = address(uint160(0x2000 + i));
+                p[i] = address(uint160(uint256(keccak256(abi.encodePacked("addr", i)))));
             }
         }
+        
         return p;
     }
 }
-
