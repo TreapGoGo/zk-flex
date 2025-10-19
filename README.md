@@ -29,24 +29,27 @@ Before you begin, you need to install the following tools:
 
 ## 🚀 快速开始
 
-### Hackathon Demo 演示（3 个命令）
+### Hackathon Demo 演示
 
+**详细步骤请查看 [运行指南.md](运行指南.md)**
+
+快速启动：
 ```bash
-# Terminal 1: 启动本地链
+# Terminal 1: 启动链
 yarn chain
 
-# Terminal 2: 部署合约并运行 Demo（等链启动后 5 秒）
+# Terminal 2: 运行 Demo（等 5 秒，在 packages/foundry 目录）
 cd packages/foundry
-forge script script/DemoSimple.s.sol \
-  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
-  --rpc-url http://localhost:8545 \
-  --broadcast
+export BOB_REAL_ADDRESS=0x你的地址
+forge script script/DemoSimple.s.sol --private-key 0xac09... --rpc-url http://localhost:8545 --broadcast
 
-# Terminal 3: 启动前端（等部署完成）
+# Terminal 3: 启动前端
 yarn start
 ```
 
 访问：http://localhost:3000
+
+**⚠️ 必读**：[运行指南.md](运行指南.md) 有完整命令（包括你的真实地址）
 
 ---
 
