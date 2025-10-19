@@ -27,31 +27,41 @@ Before you begin, you need to install the following tools:
 - [Circom (>= 2.0.2)](https://docs.circom.io/getting-started/installation/)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 
-## ⚠️ ZK Flex 特殊设置
+## 🚀 快速开始
 
-**ZK 电路文件太大（~5GB），未上传到 GitHub。**
-
-新开发者 clone 代码后，需要运行以下命令生成电路文件：
+### Hackathon Demo 演示（3 个命令）
 
 ```bash
-# 方案 1：自动构建（推荐，需要 8GB RAM）
-./scripts/setup-circuits.sh
+# Terminal 1: 启动本地链
+yarn chain
 
-# 耗时：约 15-20 分钟（包括下载 Powers of Tau 2.3GB）
-# 生成：所有必需的电路文件
+# Terminal 2: 部署合约并运行 Demo（等链启动后 5 秒）
+cd packages/foundry
+forge script script/DemoSimple.s.sol \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+  --rpc-url http://localhost:8545 \
+  --broadcast
 
-# 方案 2：快速下载（如果团队提供）
-# （联系团队获取预编译文件下载链接）
+# Terminal 3: 启动前端（等部署完成）
+yarn start
 ```
 
-**如果是 Demo 演示（已有编译文件）**：
+访问：http://localhost:3000
 
-```bash
-# 复制电路文件到前端
-mkdir -p packages/nextjs/public/circuits
-cp circuits/build/wealth_proof_js/wealth_proof.wasm packages/nextjs/public/circuits/
-cp circuits/build/wealth_proof_final.zkey packages/nextjs/public/circuits/
-```
+---
+
+## 📚 文档导航
+
+| 文档 | 用途 | 适合 |
+|------|------|------|
+| [README.md](README.md) | 项目介绍和快速开始 | 所有人 |
+| [QUICKSTART.md](QUICKSTART.md) | 10 分钟上手 | 新手 |
+| [FINAL_CHECKLIST.md](FINAL_CHECKLIST.md) | Hackathon 演示清单 | 演示前 |
+| [PRODUCT.md](PRODUCT.md) | 完整产品规格 | 深入理解 |
+| [ROADMAP.md](ROADMAP.md) | 开发进度追踪 | 团队协作 |
+| [SLIDES.md](SLIDES.md) | Pitch 演示大纲 | Branding |
+
+---
 
 ## Quickstart
 

@@ -4,27 +4,30 @@
 
 ---
 
-## 📦 方式 1：快速 Demo（推荐）
-
-### 一键启动
+## 📦 快速 Demo（3 个命令）
 
 ```bash
-# 1. Clone 代码
+# 1. Clone 并安装
 git clone https://github.com/TreapGoGo/zk-flex.git
 cd zk-flex
-
-# 2. 安装依赖
 yarn install
 
-# 3. 启动本地链（Terminal 1）
+# 2. 启动链（Terminal 1）
 yarn chain
 
-# 4. 运行 Demo（Terminal 2）
+# 3. 部署并 Demo（Terminal 2，等链启动 5 秒后）
 cd packages/foundry
 forge script script/DemoSimple.s.sol \
-  --fork-url http://localhost:8545 \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
+  --rpc-url http://localhost:8545 \
   --broadcast
+
+# 4. 启动前端（Terminal 3，等部署完成）
+cd ~/zk-flex
+yarn start
 ```
+
+访问：http://localhost:3000
 
 ### 预期输出
 
