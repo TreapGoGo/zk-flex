@@ -29,12 +29,16 @@ const BobPage: NextPage = () => {
   const { writeContractAsync: createInstance } = useScaffoldWriteContract("WealthProofRegistry");
   const { signMessageAsync } = useSignMessage();
   
-  // 读取实例快照（如果已创建）
-  const { data: snapshot } = useScaffoldReadContract({
-    contractName: "WealthProofInstance",
-    address: instanceAddress || undefined,
-    functionName: "getLatestSnapshot",
-  });
+  // 读取实例快照
+  // 注意：WealthProofInstance 是动态创建的，不在 deployedContracts.ts 中
+  // 暂时禁用自动加载，等待实际实现
+  const snapshot = null; // TODO: 实现读取快照
+  
+  // const { data: snapshot } = useScaffoldReadContract({
+  //   contractName: "WealthProofInstance",
+  //   address: instanceAddress || undefined,
+  //   functionName: "getLatestSnapshot",
+  // });
   
   /**
    * 处理创建实例
@@ -380,7 +384,7 @@ const BobPage: NextPage = () => {
             {/* Generate Proof Button */}
             <button
               onClick={handleGenerateProof}
-              disabled={!instanceAddress || !snapshot || isGenerating}
+              disabled={!instanceAddress || isGenerating}
               className="btn btn-secondary btn-lg w-full"
             >
               {isGenerating ? (
