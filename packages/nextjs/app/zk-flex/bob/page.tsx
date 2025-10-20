@@ -52,29 +52,32 @@ const BobPage: NextPage = () => {
       }
       
       // 调用合约创建实例
-      const tx = await createInstance({
+      // createInstance 返回交易哈希，不是 Instance 地址
+      const txHash = await createInstance({
         functionName: "createProofInstance",
         args: [walletAddresses as `0x${string}`[]],
       });
       
-      // 等待交易确认获取实例地址
-      // 注意：createInstance 返回 address，需要从事件中获取
-      // 暂时使用一个 mock 地址，实际应该从交易 receipt 的事件中解析
+      console.log("Transaction hash:", txHash);
       
-      // TODO: 从交易 receipt 的 InstanceCreated 事件中获取实例地址
-      // const receipt = await tx.wait();
-      // const event = receipt.events.find(e => e.event === 'InstanceCreated');
-      // const newInstanceAddress = event.args.instance;
+      // 提示用户从 Terminal 或区块浏览器获取 Instance 地址
+      // Scaffold-ETH 的 writeContract 不直接返回合约返回值
       
-      // 临时：从已知的部署地址推断（Demo 时可用）
-      // 实际应该从事件中获取
-      const mockInstanceAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"; // 替换为实际地址
-      
-      setInstanceAddress(mockInstanceAddress);
+      // 折叠 Step 1
       setIsStep1Collapsed(true);
       setIsCreating(false);
       
-      alert(`Instance created! Address: ${mockInstanceAddress}`);
+      alert(
+        "Instance created!\n\n" +
+        "Please check:\n" +
+        "1. Browser console for transaction hash\n" +
+        "2. Terminal output for Instance address\n" +
+        "3. Or use Debug page: http://localhost:3000/debug\n\n" +
+        "Then paste the Instance address below."
+      );
+      
+      // 用户需要手动输入 Instance 地址
+      // 或者可以从 getAllInstances() 查询最后一个
     } catch (error) {
       console.error("Error creating instance:", error);
       alert("Failed to create instance: " + (error as Error).message);
