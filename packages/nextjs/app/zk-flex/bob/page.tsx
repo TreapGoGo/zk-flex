@@ -96,7 +96,12 @@ const BobPage: NextPage = () => {
    * 生成 ZK 证明
    */
   const handleGenerateProof = async () => {
-    if (!connectedAddress || !instanceAddress || !snapshot) {
+    if (!connectedAddress) {
+      alert("Please connect wallet first");
+      return;
+    }
+    
+    if (!instanceAddress) {
       alert("Please create instance first");
       return;
     }
