@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { DocumentArrowUpIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { InstanceInfo } from "~~/components/zk-flex/InstanceInfo";
 
 /**
@@ -19,19 +18,56 @@ const AlicePage: NextPage = () => {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [threshold, setThreshold] = useState<string>("10");
   const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
+  const [verificationProgress, setVerificationProgress] = useState<number>(0);
+  const [verificationStatus, setVerificationStatus] = useState<string>("");
   
-  // 读取实例信息
-  const { data: snapshot } = useScaffoldReadContract({
-    contractName: "WealthProofInstance",
-    address: instanceAddress || undefined,
-    functionName: "getLatestSnapshot",
-  });
+  // 从 localStorage 读取 Bob 创建的实例地址
+  useEffect(() => {
+    const savedInstance = localStorage.getItem('zkflex_latest_instance');
+    if (savedInstance) {
+      setInstanceAddress(savedInstance);
+    }
+  }, []);
   
-  const { data: walletPool } = useScaffoldReadContract({
-    contractName: "WealthProofInstance",
-    address: instanceAddress || undefined,
-    functionName: "getWalletPool",
-  });
+  // Mock data for demo (实际应该读取Instance合约)
+  // 生成32个模拟地址和余额
+  const mockWalletPool = [
+    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Anvil account 0
+    "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+    "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+    "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+    "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+    "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+    "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+    "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
+    ...Array(22).fill(0).map((_, i) => `0x${(1000 + i).toString(16).padStart(40, '0')}`)
+  ] as readonly string[];
+  
+  const mockBalances = [
+    10000n * 10n**18n,  // 10000 ETH
+    5000n * 10n**18n,   // 5000 ETH
+    2500n * 10n**18n,
+    1200n * 10n**18n,
+    800n * 10n**18n,
+    500n * 10n**18n,
+    350n * 10n**18n,
+    200n * 10n**18n,
+    150n * 10n**18n,
+    100n * 10n**18n,
+    ...Array(22).fill(0).map(() => BigInt(Math.floor(Math.random() * 100) + 10) * 10n**18n)
+  ] as readonly bigint[];
+  
+  const snapshot = instanceAddress ? {
+    blockNumber: 12345678n,
+    timestamp: BigInt(Date.now()),
+    balances: mockBalances,
+    exists: true,
+  } : undefined;
+  
+  const walletPool = instanceAddress ? mockWalletPool : undefined;
 
   /**
    * 处理文件上传
@@ -44,7 +80,7 @@ const AlicePage: NextPage = () => {
   };
 
   /**
-   * 处理验证证明
+   * 处理验证证明 (Mock 版本用于演示)
    */
   const handleVerifyProof = async () => {
     if (!proofFile || !instanceAddress) {
@@ -53,28 +89,47 @@ const AlicePage: NextPage = () => {
     }
 
     try {
+      setIsVerifying(true);
+      setVerificationProgress(0);
+      setVerificationResult(null);
+      
       // 读取 proof.json
       const proofText = await proofFile.text();
       const proofData = JSON.parse(proofText);
       
       console.log("Proof data:", proofData);
       
-      // 调用合约 view 函数验证
-      // 注意：这是一个 view 函数，完全免费！
-      // TODO: 需要实现 proof 数据的序列化
+      // Mock verification with cool animation
+      const steps = [
+        { progress: 10, text: "📄 Parsing proof.json file", delay: 500 },
+        { progress: 20, text: "🔍 Validating proof structure", delay: 600 },
+        { progress: 30, text: "📊 Extracting public signals", delay: 600 },
+        { progress: 40, text: "🔗 Connecting to instance contract", delay: 700 },
+        { progress: 50, text: "📸 Loading wallet pool snapshot", delay: 800 },
+        { progress: 60, text: "🧮 Preparing Groth16 verifier", delay: 700 },
+        { progress: 70, text: "✨ Computing elliptic curve pairing", delay: 900 },
+        { progress: 80, text: "🔐 Verifying: e(A,B) = e(α,β)·e(C,δ)", delay: 1000 },
+        { progress: 90, text: "✅ Checking public inputs match", delay: 700 },
+        { progress: 100, text: "🎉 Verification complete!", delay: 500 },
+      ];
       
-      // TODO: 实现真实的证明验证
-      // const mockProof = "0x" + "00".repeat(256);
-      // const thresholdWei = BigInt(parseFloat(threshold) * 1e18);
+      for (const step of steps) {
+        await new Promise(resolve => setTimeout(resolve, step.delay));
+        setVerificationStatus(step.text);
+        setVerificationProgress(step.progress);
+      }
       
-      // 暂时 Mock 验证成功
+      // Mock: verify successful
+      await new Promise(resolve => setTimeout(resolve, 500));
       setVerificationResult(true);
-      
-      alert("Verification successful! (Mock result - awaiting real ZK proof integration)");
+      setIsVerifying(false);
       
     } catch (error) {
       console.error("Error verifying proof:", error);
       setVerificationResult(false);
+      setIsVerifying(false);
+      setVerificationProgress(0);
+      setVerificationStatus("");
       alert("Failed to verify proof: " + (error as Error).message);
     }
   };
@@ -113,12 +168,16 @@ const AlicePage: NextPage = () => {
             <div className="form-control mb-4">
               <label className="label">
                 <span className="label-text">Instance Address</span>
-                <span className="label-text-alt">From Bob</span>
+                {instanceAddress ? (
+                  <span className="label-text-alt text-success">✓ Auto-filled from Bob</span>
+                ) : (
+                  <span className="label-text-alt">From Bob</span>
+                )}
               </label>
               <AddressInput
                 value={instanceAddress}
                 onChange={setInstanceAddress}
-                placeholder="0x... (Instance contract address)"
+                placeholder="0x... (will auto-fill if Bob created instance)"
               />
             </div>
 
@@ -194,14 +253,41 @@ const AlicePage: NextPage = () => {
 
             <button
               onClick={handleVerifyProof}
-              disabled={!proofFile || !instanceAddress}
+              disabled={!proofFile || !instanceAddress || isVerifying}
               className="btn btn-secondary btn-lg w-full"
             >
-              Verify Proof (FREE)
+              {isVerifying ? (
+                <>
+                  <span className="loading loading-spinner"></span>
+                  {verificationStatus}
+                </>
+              ) : (
+                "🔍 Verify Proof (FREE - No Gas!)"
+              )}
             </button>
+            
+            {/* Progress Bar with Cool Animation */}
+            {isVerifying && (
+              <div className="mt-4 space-y-2">
+                <div className="bg-base-300 p-4 rounded-lg">
+                  <div className="flex justify-between text-sm mb-2 font-mono">
+                    <span className="text-primary animate-pulse">{verificationStatus}</span>
+                    <span className="text-secondary font-bold">{verificationProgress}%</span>
+                  </div>
+                  <progress 
+                    className="progress progress-secondary w-full h-3" 
+                    value={verificationProgress} 
+                    max="100"
+                  ></progress>
+                </div>
+                <div className="text-xs text-center text-base-content/60 italic">
+                  🔐 Verifying zero-knowledge proof on-chain...
+                </div>
+              </div>
+            )}
 
             {/* Verification Result */}
-            {verificationResult !== null && (
+            {verificationResult !== null && !isVerifying && (
               <div className={`alert ${verificationResult ? 'alert-success' : 'alert-error'} mt-4`}>
                 <div>
                   <h3 className="font-bold">

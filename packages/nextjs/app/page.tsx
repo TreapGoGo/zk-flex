@@ -91,11 +91,11 @@ const Home: NextPage = () => {
               <div className="text-slate-500 text-sm">Wallet Pool Size</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-1">~150k</div>
+              <div className="text-4xl font-bold text-white mb-1">~1.88M</div>
               <div className="text-slate-500 text-sm">ZK Constraints</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-1">10-20s</div>
+              <div className="text-4xl font-bold text-white mb-1">~60s</div>
               <div className="text-slate-500 text-sm">Proof Time</div>
             </div>
           </div>
@@ -176,7 +176,7 @@ const Home: NextPage = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-slate-700">
                       <CheckCircleIcon className="h-4 w-4 text-blue-500" />
-                      <span>10-20s proof time</span>
+                      <span>60s proof time</span>
                     </div>
                   </div>
 
