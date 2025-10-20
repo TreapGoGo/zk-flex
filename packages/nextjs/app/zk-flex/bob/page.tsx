@@ -29,6 +29,12 @@ const BobPage: NextPage = () => {
   const { writeContractAsync: createInstance } = useScaffoldWriteContract("WealthProofRegistry");
   const { signMessageAsync } = useSignMessage();
   
+  // 读取所有实例（用于获取最新创建的实例地址）
+  const { data: allInstances, refetch: refetchInstances } = useScaffoldReadContract({
+    contractName: "WealthProofRegistry",
+    functionName: "getAllInstances",
+  });
+  
   // 读取实例快照
   // 注意：WealthProofInstance 是动态创建的，不在 deployedContracts.ts 中
   // 暂时禁用自动加载，等待实际实现
@@ -56,32 +62,29 @@ const BobPage: NextPage = () => {
       }
       
       // 调用合约创建实例
-      // createInstance 返回交易哈希，不是 Instance 地址
-      const txHash = await createInstance({
+      await createInstance({
         functionName: "createProofInstance",
         args: [walletAddresses as `0x${string}`[]],
       });
       
-      console.log("Transaction hash:", txHash);
+      // 等待交易确认后，重新查询所有实例
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 等待 2 秒
       
-      // 提示用户从 Terminal 或区块浏览器获取 Instance 地址
-      // Scaffold-ETH 的 writeContract 不直接返回合约返回值
+      // 刷新实例列表
+      const { data: updatedInstances } = await refetchInstances();
+      
+      // 获取最新创建的实例（数组最后一个）
+      if (updatedInstances && updatedInstances.length > 0) {
+        const latestInstance = updatedInstances[updatedInstances.length - 1];
+        setInstanceAddress(latestInstance);
+        console.log("Instance created:", latestInstance);
+      }
       
       // 折叠 Step 1
       setIsStep1Collapsed(true);
       setIsCreating(false);
       
-      alert(
-        "Instance created!\n\n" +
-        "Please check:\n" +
-        "1. Browser console for transaction hash\n" +
-        "2. Terminal output for Instance address\n" +
-        "3. Or use Debug page: http://localhost:3000/debug\n\n" +
-        "Then paste the Instance address below."
-      );
-      
-      // 用户需要手动输入 Instance 地址
-      // 或者可以从 getAllInstances() 查询最后一个
+      alert("Instance created and auto-filled to Step 2!");
     } catch (error) {
       console.error("Error creating instance:", error);
       alert("Failed to create instance: " + (error as Error).message);
