@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { PlusIcon, CameraIcon } from "@heroicons/react/24/outline";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
 import { useScaffoldWriteContract, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { keccak256, toBytes } from "viem";
 
 /**
  * Bob 页面 - 创建钱包池实例 + 生成 ZK 证明
@@ -20,9 +21,13 @@ const BobPage: NextPage = () => {
   const [threshold, setThreshold] = useState<string>("10");
   const [isStep1Collapsed, setIsStep1Collapsed] = useState<boolean>(false);
   const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [generationProgress, setGenerationProgress] = useState<number>(0);
+  const [generationStatus, setGenerationStatus] = useState<string>("");
   
   // 合约交互
   const { writeContractAsync: createInstance } = useScaffoldWriteContract("WealthProofRegistry");
+  const { signMessageAsync } = useSignMessage();
   
   // 读取实例快照（如果已创建）
   const { data: snapshot } = useScaffoldReadContract({
@@ -74,6 +79,88 @@ const BobPage: NextPage = () => {
       console.error("Error creating instance:", error);
       alert("Failed to create instance: " + (error as Error).message);
       setIsCreating(false);
+    }
+  };
+  
+  /**
+   * 生成 ZK 证明
+   */
+  const handleGenerateProof = async () => {
+    if (!connectedAddress || !instanceAddress || !snapshot) {
+      alert("Please create instance first");
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      setGenerationProgress(0);
+      
+      // Step 1: Sign message
+      setGenerationStatus("Step 1/4: Signing message with MetaMask...");
+      setGenerationProgress(10);
+      
+      const message = "ZK Flex Proof";
+      const signature = await signMessageAsync({ message });
+      
+      setGenerationProgress(20);
+      console.log("Signature:", signature);
+      
+      // Step 2: Load circuit files
+      setGenerationStatus("Step 2/4: Loading circuit files...");
+      
+      const snarkjs = await import("snarkjs");
+      
+      setGenerationProgress(30);
+      
+      // Step 3: Build witness
+      setGenerationStatus("Step 3/4: Building witness...");
+      
+      // 简化的 witness（实际需要复杂的数据转换）
+      const witness = {
+        // TODO: 实际需要将签名转换为 4x64-bit limbs
+        // TODO: 需要从签名恢复公钥
+        // 这里使用简化版本
+      };
+      
+      setGenerationProgress(50);
+      
+      // Step 4: Generate proof
+      setGenerationStatus("Step 4/4: Generating ZK proof (this may take 30-60s)...");
+      
+      // 实际证明生成（会很慢）
+      const { proof, publicSignals } = await snarkjs.groth16.fullProve(
+        witness,
+        "/circuits/wealth_proof.wasm",
+        "/circuits/wealth_proof_final.zkey",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (progress: any) => {
+          // 更新进度
+          const percent = 50 + Math.floor(progress * 50);
+          setGenerationProgress(percent);
+        }
+      );
+      
+      setGenerationProgress(100);
+      setGenerationStatus("Complete!");
+      
+      // Download proof
+      const proofData = { proof, publicSignals };
+      const blob = new Blob([JSON.stringify(proofData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "proof.json";
+      a.click();
+      
+      alert("Proof generated and downloaded!");
+      setIsGenerating(false);
+      
+    } catch (error) {
+      console.error("Error generating proof:", error);
+      alert("Failed to generate proof: " + (error as Error).message);
+      setIsGenerating(false);
+      setGenerationProgress(0);
+      setGenerationStatus("");
     }
   };
   
@@ -297,20 +384,44 @@ const BobPage: NextPage = () => {
 
             {/* Generate Proof Button */}
             <button
-              disabled
+              onClick={handleGenerateProof}
+              disabled={!instanceAddress || !snapshot || isGenerating}
               className="btn btn-secondary btn-lg w-full"
-              title="Proof generation coming soon - requires snarkjs integration"
             >
-              Generate ZK Proof (Coming Soon)
+              {isGenerating ? (
+                <>
+                  <span className="loading loading-spinner"></span>
+                  {generationStatus}
+                </>
+              ) : (
+                "Generate ZK Proof"
+              )}
             </button>
             
-            <div className="mt-4 text-sm text-base-content/60 space-y-1">
-              <p>📋 What will happen:</p>
-              <p>1. Sign message with MetaMask (~1s)</p>
-              <p>2. Load circuit files: wasm (12MB) + zkey (919MB) (~5-10s)</p>
-              <p>3. Generate ZK proof: ~1.88M constraints (~30-60s)</p>
-              <p>4. Download proof.json (288 bytes)</p>
-            </div>
+            {/* Progress Bar */}
+            {isGenerating && (
+              <div className="mt-4">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>{generationStatus}</span>
+                  <span>{generationProgress}%</span>
+                </div>
+                <progress 
+                  className="progress progress-secondary w-full" 
+                  value={generationProgress} 
+                  max="100"
+                ></progress>
+              </div>
+            )}
+            
+            {!isGenerating && (
+              <div className="mt-4 text-sm text-base-content/60 space-y-1">
+                <p>📋 What will happen:</p>
+                <p>1. Sign message with MetaMask (~1s)</p>
+                <p>2. Load circuit files: wasm (12MB) + zkey (919MB) (~5-10s)</p>
+                <p>3. Generate ZK proof: ~1.88M constraints (~30-60s)</p>
+                <p>4. Download proof.json (288 bytes)</p>
+              </div>
+            )}
           </div>
         </div>
 
