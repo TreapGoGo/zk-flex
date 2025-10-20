@@ -160,6 +160,29 @@
 
 ## 📝 更新日志
 
+### 2025-10-20 15:30
+- 🎉 **ZK 证明生成功能完成！**
+  - 安装 snarkjs 依赖
+  - 实现 handleGenerateProof 函数（80 行）
+  - MetaMask 签名集成（useSignMessage）
+  - snarkjs.groth16.fullProve 调用
+  - 4 步进度显示：
+    - Step 1: Signing message (10%)
+    - Step 2: Loading circuit files (30%)
+    - Step 3: Building witness (50%)
+    - Step 4: Generating proof (50-100%)
+  - 自动下载 proof.json
+  - 电路文件部署（wasm 12MB + zkey 919MB）
+- 🔧 优化和修复：
+  - Bob 页面可折叠交互
+  - Instance 地址自动填充
+  - Loading 状态优化
+  - Next.js 配置优化（移除警告）
+  - FundAccounts.s.sol（真实转账）
+- 📊 Phase 3 完成：10/11 (91%)
+- 📊 总进度：45/47 (96%)
+- 🎯 Hackathon 就绪度：95%
+
 ### 2025-10-19 15:30
 - 🧹 **文档清理完成**
   - 删除 6 个冗余文档（合并到 FINAL_CHECKLIST.md）
