@@ -63,13 +63,11 @@ const AlicePage: NextPage = () => {
       // 注意：这是一个 view 函数，完全免费！
       // TODO: 需要实现 proof 数据的序列化
       
-      // 暂时使用 mock 验证
-      const mockProof = "0x" + "00".repeat(256); // 256 bytes
-      const thresholdWei = BigInt(parseFloat(threshold) * 1e18);
+      // TODO: 实现真实的证明验证
+      // const mockProof = "0x" + "00".repeat(256);
+      // const thresholdWei = BigInt(parseFloat(threshold) * 1e18);
       
-      // 这里需要调用实际的 verifyProof 函数
-      // 由于需要正确的 proof 格式，暂时显示说明
-      
+      // 暂时 Mock 验证成功
       setVerificationResult(true);
       
       alert("Verification successful! (Mock result - awaiting real ZK proof integration)");
@@ -211,10 +209,10 @@ const AlicePage: NextPage = () => {
                   </h3>
                   {verificationResult ? (
                     <div className="text-sm mt-2 space-y-1">
-                      <p>✓ Someone in the 32-address pool</p>
-                      <p>✓ Has balance >= {threshold} ETH</p>
-                      <p>✗ You don't know WHO</p>
-                      <p>✗ You don't know their EXACT balance</p>
+                      <p>[YES] Someone in the 32-address pool</p>
+                      <p>[YES] Has balance {">="} {threshold} ETH</p>
+                      <p>[NO] You do not know WHO</p>
+                      <p>[NO] You do not know their EXACT balance</p>
                     </div>
                   ) : (
                     <p className="text-sm mt-2">The proof could not be verified</p>
@@ -234,7 +232,7 @@ const AlicePage: NextPage = () => {
               <li>• Calls instance.verifyProof() (view function)</li>
               <li>• Groth16Verifier validates the ZK proof</li>
               <li>• Checks public inputs match the snapshot</li>
-              <li>• Returns true/false (no gas cost!)</li>
+              <li>• Returns true/false (no gas cost)</li>
             </ul>
           </div>
         </div>
